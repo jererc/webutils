@@ -2,7 +2,7 @@ import unittest
 
 from selenium.webdriver.common.by import By
 
-import webutils
+from webutils import webutils
 
 
 class DriverTestCase(unittest.TestCase):
