@@ -5,18 +5,18 @@ from selenium.webdriver.common.by import By
 import webutils
 
 
-class BrowserTestCase(unittest.TestCase):
+class DriverTestCase(unittest.TestCase):
     def setUp(self):
-        self.browser = webutils.Browser(browser_id='chrome', headless=False)
-        self.driver = self.browser.driver
+        self.driver = webutils.get_browser_driver(browser_id='chrome',
+            headless=False)
 
     def tearDown(self):
         self.driver.quit()
 
-    def test_no_result(self):
+    def test_element(self):
         url = 'https://1337x.to/search/sfsfsfsdfsd/1/'
         self.driver.get(url)
         el = self.driver.find_element(By.XPATH,
-            "//p[contains(text(), 'No results were returned.')]")
+            '//p[contains(text(), "No results were returned.")]')
         print(el)
         self.assertTrue(el)
