@@ -16,7 +16,7 @@ setup(
         'selenium',
     ],
     extras_require={
-        'dev': ['pytest', 'flake8'],
+        'dev': ['flake8', 'pytest'],
     },
     include_package_data=True,
 )
