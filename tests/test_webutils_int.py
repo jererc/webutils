@@ -2,12 +2,12 @@ import unittest
 
 from selenium.webdriver.common.by import By
 
-from webutils import webutils
+from webutils import browser
 
 
 class DriverTestCase(unittest.TestCase):
     def setUp(self):
-        self.driver = webutils.get_browser_driver(browser_id='chrome',
+        self.driver = browser.get_driver(browser_id='chrome',
             headless=False)
 
     def tearDown(self):

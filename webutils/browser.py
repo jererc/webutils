@@ -1,6 +1,3 @@
-#
-# DEPRECATED
-#
 import os
 import subprocess
 
@@ -8,7 +5,7 @@ from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 
 
-BROWSER_CONFIGS = {
+CONFIGS = {
     'nt': {
         'brave': {
             'binary': r'C:\Program Files\BraveSoftware'
@@ -34,16 +31,16 @@ BROWSER_CONFIGS = {
         },
     },
 }[os.name]
-BROWSER_KILL_CMD = {
+KILL_CMD = {
     'nt': 'taskkill /IM {binary}',
     'posix': 'pkill {binary}',
 }[os.name]
 BROWSER_ID = 'chrome'
-BROWSER_PROFILE_DIR = 'selenium'
+PROFILE_DIR = 'selenium'
 
 
 class Browser:
-    def __init__(self, browser_id=BROWSER_ID, profile_dir=BROWSER_PROFILE_DIR,
+    def __init__(self, browser_id=BROWSER_ID, profile_dir=PROFILE_DIR,
             headless=False, page_load_strategy=None):
         self.profile_dir = profile_dir
         self.headless = headless
@@ -55,16 +52,16 @@ class Browser:
     def _get_config(self, browser_id):
         if browser_id:
             try:
-                return BROWSER_CONFIGS[browser_id]
+                return CONFIGS[browser_id]
             except KeyError:
                 raise Exception(f'unsupported browser_id {browser_id}')
-        for config in BROWSER_CONFIGS.values():
+        for config in CONFIGS.values():
             if all(os.path.exists(p) for p in config.values()):
                 return config
         raise Exception('no available browser')
 
     def _kill_running_browser(self):
-        subprocess.call(BROWSER_KILL_CMD.format(
+        subprocess.call(KILL_CMD.format(
             binary=os.path.basename(self.binary)), shell=True)
 
     def get_driver(self):
@@ -88,5 +85,5 @@ class Browser:
         return driver
 
 
-def get_browser_driver(*args, **kwargs):
+def get_driver(*args, **kwargs):
     return Browser(*args, **kwargs).get_driver()
