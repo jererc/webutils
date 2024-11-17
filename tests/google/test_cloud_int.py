@@ -6,7 +6,7 @@ import unittest
 from webutils.google.cloud import get_google_cloud
 
 
-SECRETS_FILE = os.path.expanduser('~/gcs.json')
+SECRETS_FILE = os.path.join(os.path.expanduser('~'), 'gcs.json')
 
 
 def makedirs(x):

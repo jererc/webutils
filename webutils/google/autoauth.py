@@ -26,16 +26,17 @@ class Autoauth:
                 NoSuchElementException])
         wait.until(lambda x: element.is_displayed())
 
-    def _select_user(self):
-        self.driver.find_element(By.XPATH, '//div[@data-authuser="0"]').click()
-
-    def _click_continue(self):
-        try:
-            self.driver.find_element(By.XPATH,
-                '//button[contains(., "Continue")]').click()
-            return True
-        except NoSuchElementException:
-            return False
+    def _click_if_exists(self, xpath, timeout=2, poll_frequency=.2):
+        end_ts = time.time() + timeout
+        while time.time() < end_ts:
+            try:
+                self.driver.find_element(By.XPATH, xpath).click()
+                logger.info(f'clicked: {xpath}')
+                return True
+            except NoSuchElementException:
+                time.sleep(poll_frequency)
+        logger.info(f'not found: {xpath}')
+        return False
 
     def _requires_manual_auth(self):
         try:
@@ -44,36 +45,27 @@ class Autoauth:
         except NoSuchElementException:
             return False
 
-    def _wait_for_login(self, url, poll_frequency=1, timeout=120):
-        self.driver.get(url)
-        end_ts = time.time() + timeout
-        while time.time() < end_ts:
-            try:
-                self._select_user()
-            except NoSuchElementException:
-                if self._click_continue():
-                    return
-                elif self._requires_manual_auth() and self.headless:
-                    raise Exception('requires manual auth')
-            else:
-                if self._click_continue():
-                    return
-            time.sleep(poll_frequency)
-        raise Exception('login timeout')
-
     def _fetch_code(self, auth_url):
-        self._wait_for_login(auth_url, poll_frequency=1, timeout=120)
-        self.driver.find_element(By.XPATH,
-            '//input[@type="checkbox" and @aria-label="Select all"]',
-            ).click()
-        el_continue = self.driver.find_element(By.XPATH,
-            '//button[contains(., "Continue")]')
-        self._wait_for_element(el_continue)
-        el_continue.click()
+        self.driver.get(auth_url)
+        if self._requires_manual_auth():
+            if self.headless:
+                raise Exception('requires manual auth')
+            if not self._click_if_exists('//span[contains(text(), "Continue")]',
+                    timeout=120, poll_frequency=2):
+                raise Exception('login timeout')
+        else:
+            if not self._click_if_exists('//div[@data-authuser="0"]'):
+                self._click_if_exists('//button[@id="choose-account-0"]')
+            self._click_if_exists('//button[@id="submit_approve_access"]')
+            self._click_if_exists('//span[contains(text(), "Continue")]')
+
+        if self._click_if_exists(
+                '//input[@type="checkbox" and @aria-label="Select all"]'):
+            self._click_if_exists('//button[contains(., "Continue")]')
+        self._click_if_exists('//button[@id="submit_approve_access"]')
         el_textarea = self.driver.find_element(By.XPATH, '//textarea')
         self._wait_for_element(el_textarea)
-        res = el_textarea.get_attribute('innerHTML')
-        return res
+        return el_textarea.get_attribute('innerHTML')
 
     def acquire_credentials(self):
         flow = InstalledAppFlow.from_client_secrets_file(

@@ -3,6 +3,7 @@ import subprocess
 
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
+from selenium.webdriver.common.by import By
 
 
 CONFIGS = {
@@ -83,6 +84,19 @@ class Browser:
         driver = webdriver.Chrome(options=options)
         driver.implicitly_wait(1)
         return driver
+
+
+def debug_driver(driver, xpaths):
+    for xpath in xpaths:
+        els = driver.find_elements(By.XPATH, xpath)
+        print(f'{xpath} elements: {len(els)}')
+        for i, el in enumerate(els):
+            print(f'element {i}:\n{el.get_attribute("outerHTML")}')
+
+    file = os.path.join(os.path.expanduser('~'),
+        '_selenium_screenshot.png')
+    driver.save_screenshot(file)
+    print(f'saved screenshot {file}')
 
 
 def get_driver(*args, **kwargs):
