@@ -286,3 +286,7 @@ class GoogleCloud:
             if page_token is None:
                 break
         return contacts
+
+
+def get_google_cloud(secrets_file, **kwargs):
+    return GoogleCloud(oauth_secrets_file=secrets_file, **kwargs)
