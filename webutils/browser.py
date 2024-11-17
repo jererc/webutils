@@ -1,9 +1,14 @@
+import logging
 import os
 import subprocess
+import time
 
 from selenium import webdriver
+from selenium.common.exceptions import (ElementNotInteractableException,
+    NoSuchElementException)
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.by import By
+from selenium.webdriver.support.ui import WebDriverWait
 
 
 CONFIGS = {
@@ -38,6 +43,8 @@ KILL_CMD = {
 }[os.name]
 BROWSER_ID = 'chrome'
 PROFILE_DIR = 'selenium'
+
+logger = logging.getLogger(__name__)
 
 
 class Browser:
@@ -86,17 +93,36 @@ class Browser:
         return driver
 
 
-def debug_driver(driver, xpaths):
-    for xpath in xpaths:
-        els = driver.find_elements(By.XPATH, xpath)
-        print(f'{xpath} elements: {len(els)}')
-        for i, el in enumerate(els):
-            print(f'element {i}:\n{el.get_attribute("outerHTML")}')
+class DriverHelper:
+    def _wait_for_element(self, element):
+        wait = WebDriverWait(self.driver, timeout=5, poll_frequency=.2,
+            ignored_exceptions=[ElementNotInteractableException,
+                NoSuchElementException])
+        wait.until(lambda x: element.is_displayed())
 
-    file = os.path.join(os.path.expanduser('~'),
-        '_selenium_screenshot.png')
-    driver.save_screenshot(file)
-    print(f'saved screenshot {file}')
+    def _click_if_exists(self, xpath, timeout=2, poll_frequency=.2):
+        end_ts = time.time() + timeout
+        while time.time() < end_ts:
+            try:
+                self.driver.find_element(By.XPATH, xpath).click()
+                logger.info(f'clicked: {xpath}')
+                return True
+            except NoSuchElementException:
+                time.sleep(poll_frequency)
+        logger.info(f'not found: {xpath}')
+        return False
+
+    def _debug_driver(self, xpaths):
+        for xpath in xpaths:
+            els = self.driver.find_elements(By.XPATH, xpath)
+            print(f'{xpath} elements: {len(els)}')
+            for i, el in enumerate(els):
+                print(f'element {i}:\n{el.get_attribute("outerHTML")}')
+
+        file = os.path.join(os.path.expanduser('~'),
+            '_selenium_screenshot.png')
+        self.driver.save_screenshot(file)
+        print(f'saved screenshot {file}')
 
 
 def get_driver(*args, **kwargs):

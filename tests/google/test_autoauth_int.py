@@ -4,6 +4,7 @@ import os
 import shutil
 import unittest
 
+from webutils import browser
 from webutils.google import autoauth as module
 from webutils.google.cloud import SCOPES
 
@@ -11,6 +12,7 @@ from webutils.google.cloud import SCOPES
 WORK_PATH = os.path.join(os.path.expanduser('~'), '_test_webutils')
 SECRETS_FILE = os.path.join(os.path.expanduser('~'), 'gcs.json')
 
+browser.logger.setLevel(logging.DEBUG)
 module.logger.setLevel(logging.DEBUG)
 
 
