@@ -49,7 +49,7 @@ logger = logging.getLogger(__name__)
 
 class Browser:
     def __init__(self, browser_id=BROWSER_ID, profile_dir=PROFILE_DIR,
-            headless=False, page_load_strategy=None):
+                 headless=False, page_load_strategy=None):
         self.profile_dir = profile_dir
         self.headless = headless
         self.page_load_strategy = page_load_strategy
