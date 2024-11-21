@@ -49,10 +49,11 @@ logger = logging.getLogger(__name__)
 
 class Browser:
     def __init__(self, browser_id=BROWSER_ID, profile_dir=PROFILE_DIR,
-                 headless=False, page_load_strategy=None):
+                 headless=False, page_load_strategy=None, implicitly_wait=1):
         self.profile_dir = profile_dir
         self.headless = headless
         self.page_load_strategy = page_load_strategy
+        self.implicitly_wait = implicitly_wait
         config = self._get_config(browser_id)
         self.data_dir = config['data_dir']
         self.binary = config['binary']
@@ -89,7 +90,8 @@ class Browser:
         options.add_experimental_option('detach', True)
         options.binary_location = self.binary
         driver = webdriver.Chrome(options=options)
-        driver.implicitly_wait(1)
+        if self.implicitly_wait:
+            driver.implicitly_wait(self.implicitly_wait)
         return driver
 
 
