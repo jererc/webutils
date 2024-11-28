@@ -23,17 +23,14 @@ def remove_path(path):
         os.remove(path)
 
 
-def makedirs(x):
-    if not os.path.exists(x):
-        os.makedirs(x)
-
-
 class BaseTestCase(unittest.TestCase):
     def setUp(self):
-        remove_path(WORK_PATH)
+        # remove_path(WORK_PATH)
+        if not os.path.exists(WORK_PATH):
+            os.makedirs(WORK_PATH)
         makedirs(WORK_PATH)
         self.secrets_file = os.path.join(WORK_PATH, 'secrets.json')
-        shutil.copyfile(SECRETS_FILE, self.secrets_file)
+        shutil.copy(SECRETS_FILE, self.secrets_file)
 
 
 class AutoauthTestCase(BaseTestCase):
@@ -44,19 +41,18 @@ class AutoauthTestCase(BaseTestCase):
         creds_dict = json.loads(creds_json)
         self.assertTrue(creds_dict.get('token'))
 
-    def test_no_headless(self):
+    def test_1(self):
+        # Interactive workflow
         ao = module.Autoauth(self.secrets_file,
             scopes=SCOPES,
-            browser_id='chrome',
             headless=False,
         )
         res = ao.acquire_credentials()
         self._check_output(res)
 
-    def test_headless(self):
+        # Headless workflow
         ao = module.Autoauth(self.secrets_file,
             scopes=SCOPES,
-            browser_id='chrome',
             headless=True,
         )
         res = ao.acquire_credentials()

@@ -1,54 +1,79 @@
+from contextlib import contextmanager
+import json
 import logging
+import os
 
 from google_auth_oauthlib.flow import InstalledAppFlow
-from selenium.common.exceptions import NoSuchElementException
-from selenium.webdriver.common.by import By
-
-from webutils.browser import DriverHelper, get_driver
+from playwright.sync_api import sync_playwright
 
 
 logger = logging.getLogger(__name__)
 
 
-class Autoauth(DriverHelper):
-    def __init__(self, client_secrets_file, scopes, **browser_args):
+class Autoauth:
+    def __init__(self, client_secrets_file, scopes, headless=True,
+                 **browser_args):
         self.client_secrets_file = client_secrets_file
         self.scopes = scopes
-        self.headless = browser_args.get('headless', True)
-        self.driver = get_driver(**browser_args)
+        self.headless = headless
+        self.browser_args = browser_args
+        self.work_path = os.path.join(os.path.expanduser('~'),
+            f'.{os.path.splitext(os.path.basename(__file__))[0]}',
+        )
 
-    def _requires_manual_auth(self):
-        try:
-            return bool(self.driver.find_element(By.XPATH,
-                '//input[@type="email"]'))
-        except NoSuchElementException:
-            return False
+    @contextmanager
+    def playwright_context(self):
+        if not os.path.exists(self.work_path):
+            os.makedirs(self.work_path)
+        state_path = os.path.join(self.work_path, 'state.json')
+        with sync_playwright() as p:
+            try:
+                browser = p.chromium.launch(
+                    headless=self.headless,
+                    args=['--disable-blink-features=AutomationControlled'],
+                )
+                context = browser.new_context()
+                if os.path.exists(state_path):
+                    cookies = json.load(open(state_path))['cookies']
+                    context.add_cookies(cookies)
+                yield context
+            finally:
+                context.storage_state(path=state_path)
+                context.close()
+
+    def _click(self, page, selector, timeout=10000):
+        page.wait_for_selector(selector, timeout=timeout).click()
+        logger.debug(f'clicked on {selector}')
+
+    def _interactive_workflow(self, page, timeout=120000):
+        # self._click(page,
+        #     'xpath=//div[@data-authuser="0"]')
+        self._click(page,
+            'xpath=//span[contains(text(), "Continue")]',
+            timeout=timeout)
+        self._click(page,
+            'xpath=//input[@type="checkbox" and @aria-label="Select all"]')
+        self._click(page,
+            'xpath=//span[contains(text(), "Continue")]')
+
+    def _headless_worklow(self, page):
+        self._click(page,
+            'xpath=//button[@id="choose-account-0"]')
+        self._click(page,
+            'xpath=//button[@id="submit_approve_access" and not(@disabled)]')
 
     def _fetch_code(self, auth_url):
-        self.driver.get(auth_url)
-        if self._requires_manual_auth():
-            if self.headless:
-                raise Exception('requires manual login')
-            logger.info('waiting for manual login...')
-            if not self._click_if_exists(
-                    '//span[contains(text(), "Continue")]',
-                    timeout=120, poll_frequency=2):
-                raise Exception('login timeout')
-        else:
-            if self._click_if_exists('//button[@id="choose-account-0"]'):
-                self._click_if_exists(
-                    '//button[@id="submit_approve_access" and not(@disabled)]')
+        with self.playwright_context() as context:
+            page = context.new_page()
+            page.goto(auth_url)
+            if page.locator('xpath=//input[@type="email"]').count():
+                if self.headless:
+                    raise Exception('requires interactive login')
+                self._interactive_workflow(page)
             else:
-                self._click_if_exists('//div[@data-authuser="0"]')
-                self._click_if_exists('//span[contains(text(), "Continue")]')
-
-        if self._click_if_exists(
-                '//input[@type="checkbox" and @aria-label="Select all"]'):
-            self._click_if_exists('//button[contains(., "Continue")]')
-
-        el_textarea = self.driver.find_element(By.XPATH, '//textarea')
-        self._wait_for_element(el_textarea)
-        return el_textarea.get_attribute('innerHTML')
+                self._headless_worklow(page)
+            textarea = page.wait_for_selector('xpath=//textarea', timeout=5000)
+            return textarea.text_content()
 
     def acquire_credentials(self):
         flow = InstalledAppFlow.from_client_secrets_file(
@@ -58,9 +83,6 @@ class Autoauth(DriverHelper):
         )
         auth_url, _ = flow.authorization_url(prompt='consent')
         logger.debug(f'auth url: {auth_url}')
-        try:
-            code = self._fetch_code(auth_url)
-        finally:
-            self.driver.quit()
+        code = self._fetch_code(auth_url)
         flow.fetch_token(code=code)
         return flow.credentials
