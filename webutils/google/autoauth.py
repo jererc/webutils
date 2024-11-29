@@ -1,5 +1,4 @@
 from contextlib import contextmanager
-import json
 import logging
 import os
 
@@ -30,12 +29,12 @@ class Autoauth:
             try:
                 browser = p.chromium.launch(
                     headless=self.headless,
-                    args=['--disable-blink-features=AutomationControlled'],
+                    args=[
+                        '--disable-blink-features=AutomationControlled',
+                    ],
                 )
-                context = browser.new_context()
-                if os.path.exists(state_path):
-                    cookies = json.load(open(state_path))['cookies']
-                    context.add_cookies(cookies)
+                context = browser.new_context(storage_state=state_path
+                    if os.path.exists(state_path) else None)
                 yield context
             finally:
                 context.storage_state(path=state_path)
