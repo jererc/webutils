@@ -6,7 +6,7 @@ import unittest
 from webutils.google.cloud import get_google_cloud
 
 
-WORK_PATH = os.path.join(os.path.expanduser('~'), '_test_webutils')
+WORK_PATH = os.path.join(os.path.expanduser('~'), '_tests', 'webutils')
 SECRETS_FILE = os.path.join(os.path.expanduser('~'), 'gcs.json')
 
 
