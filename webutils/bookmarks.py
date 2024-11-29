@@ -1,7 +1,33 @@
 import json
 import os
 
-from webutils.browser import CONFIGS
+
+CONFIGS = {
+    'nt': {
+        'brave': {
+            'binary': r'C:\Program Files\BraveSoftware'
+                r'\Brave-Browser\Application\brave.exe',
+            'data_dir': os.path.expanduser(
+                r'~\AppData\Local\BraveSoftware\Brave-Browser\User Data'),
+        },
+        'chrome': {
+            'binary': r'C:\Program Files\Google\Chrome\Application\chrome.exe',
+            'data_dir': os.path.expanduser(
+                r'~\AppData\Local\Google\Chrome\User Data'),
+        },
+    },
+    'posix': {
+        'brave': {
+            'binary': '/opt/brave.com/brave/brave',
+            'data_dir': os.path.expanduser(
+                '~/.config/BraveSoftware/Brave-Browser'),
+        },
+        'chrome': {
+            'binary': '/opt/google/chrome/chrome',
+            'data_dir': os.path.expanduser('~/.config/google-chrome'),
+        },
+    },
+}[os.name]
 
 
 class BookmarksHandler:
