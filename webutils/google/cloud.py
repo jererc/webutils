@@ -14,7 +14,6 @@ from googleapiclient.http import MediaIoBaseDownload
 from webutils.google.autoauth import Autoauth
 
 
-CREDS_FILENAME = 'gc.json'
 SCOPES = [
     'https://www.googleapis.com/auth/contacts.readonly',
     'https://www.googleapis.com/auth/drive.readonly',
@@ -49,12 +48,16 @@ class GoogleCloud:
         self.browser_args = browser_args
         if not (self.oauth_secrets_file or self.service_secrets_file):
             raise Exception('requires a secrets file')
-        self.creds_file = os.path.join(os.path.dirname(
-            self.oauth_secrets_file or self.service_secrets_file),
-            CREDS_FILENAME)
+        self.creds_file = self._get_creds_file()
         self.service_creds = None
         self.oauth_creds = None
         self._file_cache = {}
+
+    def _get_creds_file(self):
+        dirname, basename = os.path.split(self.oauth_secrets_file
+            or self.service_secrets_file)
+        name, ext = os.path.splitext(basename)
+        return os.path.join(dirname, f'{name}-creds{ext}')
 
     def _get_service_creds(self):
         if not self.service_secrets_file:
