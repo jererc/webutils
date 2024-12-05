@@ -6,7 +6,7 @@ import unittest
 from webutils.google.cloud import get_google_cloud
 
 
-WORK_PATH = os.path.join(os.path.expanduser('~'), '_tests', 'webutils')
+WORK_DIR = os.path.join(os.path.expanduser('~'), '_tests', 'webutils')
 SECRETS_FILE = os.path.join(os.path.expanduser('~'), 'gcs.json')
 
 
@@ -24,9 +24,9 @@ def makedirs(x):
 
 class BaseTestCase(unittest.TestCase):
     def setUp(self):
-        remove_path(WORK_PATH)
-        makedirs(WORK_PATH)
-        self.secrets_file = os.path.join(WORK_PATH, 'secrets.json')
+        remove_path(WORK_DIR)
+        makedirs(WORK_DIR)
+        self.secrets_file = os.path.join(WORK_DIR, 'secrets.json')
         shutil.copyfile(SECRETS_FILE, self.secrets_file)
 
 
@@ -42,7 +42,7 @@ class GoogleTestCase(unittest.TestCase):
         self.assertTrue(exportable)
         for file_meta in exportable:
             pprint(file_meta)
-            file = os.path.join(WORK_PATH, file_meta['path'])
+            file = os.path.join(WORK_DIR, file_meta['path'])
             print(file)
             makedirs(os.path.dirname(file))
             self.gc.export_file(file_id=file_meta['id'],

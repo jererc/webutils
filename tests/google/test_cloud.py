@@ -7,7 +7,7 @@ import unittest
 from webutils.google.cloud import GoogleCloud
 
 
-WORK_PATH = os.path.join(os.path.expanduser('~'), '_tests', 'webutils')
+WORK_DIR = os.path.join(os.path.expanduser('~'), '_tests', 'webutils')
 
 
 def remove_path(path):
@@ -24,11 +24,11 @@ def makedirs(x):
 
 class FileTestCase(unittest.TestCase):
     def setUp(self):
-        remove_path(WORK_PATH)
-        makedirs(WORK_PATH)
+        remove_path(WORK_DIR)
+        makedirs(WORK_DIR)
 
     def test_1(self):
-        secrets_file = os.path.join(WORK_PATH, 'secrets.json')
+        secrets_file = os.path.join(WORK_DIR, 'secrets.json')
         self.assertRaises(Exception, GoogleCloud,
             oauth_secrets_file=secrets_file)
 
@@ -37,4 +37,4 @@ class FileTestCase(unittest.TestCase):
         res = GoogleCloud(oauth_secrets_file=secrets_file)
         print(res.creds_file)
         self.assertEqual(res.creds_file,
-            os.path.join(WORK_PATH, 'secrets-creds.json'))
+            os.path.join(WORK_DIR, 'secrets-creds.json'))

@@ -9,7 +9,7 @@ from webutils.google import autoauth as module
 from webutils.google.cloud import SCOPES
 
 
-WORK_PATH = os.path.join(os.path.expanduser('~'), '_tests', 'webutils')
+WORK_DIR = os.path.join(os.path.expanduser('~'), '_tests', 'webutils')
 SECRETS_FILE = os.path.join(os.path.expanduser('~'), 'gcs.json')
 
 browser.logger.setLevel(logging.DEBUG)
@@ -25,11 +25,11 @@ def remove_path(path):
 
 class BaseTestCase(unittest.TestCase):
     def setUp(self):
-        # remove_path(WORK_PATH)
-        if not os.path.exists(WORK_PATH):
-            os.makedirs(WORK_PATH)
-        makedirs(WORK_PATH)
-        self.secrets_file = os.path.join(WORK_PATH, 'secrets.json')
+        # remove_path(WORK_DIR)
+        if not os.path.exists(WORK_DIR):
+            os.makedirs(WORK_DIR)
+        makedirs(WORK_DIR)
+        self.secrets_file = os.path.join(WORK_DIR, 'secrets.json')
         shutil.copy(SECRETS_FILE, self.secrets_file)
 
 
