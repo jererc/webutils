@@ -48,16 +48,16 @@ class GoogleCloud:
         self.browser_args = browser_args
         if not (self.oauth_secrets_file or self.service_secrets_file):
             raise Exception('requires a secrets file')
-        self.creds_file = self._get_creds_file()
+        self.token_file = self._get_token_file()
         self.service_creds = None
         self.oauth_creds = None
         self._file_cache = {}
 
-    def _get_creds_file(self):
+    def _get_token_file(self):
         dirname, basename = os.path.split(self.oauth_secrets_file
             or self.service_secrets_file)
         name, ext = os.path.splitext(basename)
-        return os.path.join(dirname, f'{name}-creds{ext}')
+        return os.path.join(dirname, f'{name}-token{ext}')
 
     def _get_service_creds(self):
         if not self.service_secrets_file:
@@ -85,8 +85,8 @@ class GoogleCloud:
         if not self.oauth_secrets_file:
             raise Exception('missing oauth secrets')
         creds = None
-        if os.path.exists(self.creds_file):
-            creds = Credentials.from_authorized_user_file(self.creds_file,
+        if os.path.exists(self.token_file):
+            creds = Credentials.from_authorized_user_file(self.token_file,
                 SCOPES)
         if not creds or not creds.valid:
             if creds and creds.expired and creds.refresh_token:
@@ -98,7 +98,7 @@ class GoogleCloud:
                     creds = self._auth()
             else:
                 creds = self._auth()
-            with open(self.creds_file, 'w') as fd:
+            with open(self.token_file, 'w') as fd:
                 fd.write(creds.to_json())
         return creds
 

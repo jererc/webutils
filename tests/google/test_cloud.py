@@ -35,6 +35,6 @@ class FileTestCase(unittest.TestCase):
         with open(secrets_file, 'w') as fd:
             json.dump({'k': 'v'}, fd)
         res = GoogleCloud(oauth_secrets_file=secrets_file)
-        print(res.creds_file)
-        self.assertEqual(res.creds_file,
-            os.path.join(WORK_DIR, 'secrets-creds.json'))
+        print(res.token_file)
+        self.assertEqual(res.token_file,
+            os.path.join(WORK_DIR, 'secrets-token.json'))
