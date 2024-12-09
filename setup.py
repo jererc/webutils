@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name='webutils',
-    version='2024.12.08.093024',
+    version='2024.12.09.065843',
     author='jererc',
     author_email='jererc@gmail.com',
     url='https://github.com/jererc/webutils',

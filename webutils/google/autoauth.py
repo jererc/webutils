@@ -26,6 +26,7 @@ class Autoauth:
             os.makedirs(self.work_path)
         state_path = os.path.join(self.work_path, 'state.json')
         with sync_playwright() as p:
+            context = None
             try:
                 browser = p.chromium.launch(
                     headless=self.headless,
@@ -37,8 +38,9 @@ class Autoauth:
                     if os.path.exists(state_path) else None)
                 yield context
             finally:
-                context.storage_state(path=state_path)
-                context.close()
+                if context:
+                    context.storage_state(path=state_path)
+                    context.close()
 
     def _click(self, page, selector, timeout=10000):
         page.wait_for_selector(selector, timeout=timeout).click()
