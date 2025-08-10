@@ -32,7 +32,8 @@ class State:
 
 
 @contextmanager
-def playwright_context(state: State, headless=True, user_agent=DEFAULT_USER_AGENT, stealth=True):
+def playwright_context(state: State, headless=True, user_agent=DEFAULT_USER_AGENT,
+                       locale='en-US', timezone='America/New_York', stealth=True):
     with sync_playwright() as p:
         context = None
         try:
@@ -43,8 +44,8 @@ def playwright_context(state: State, headless=True, user_agent=DEFAULT_USER_AGEN
             context = browser.new_context(storage_state=state.load(),
                                           viewport={'width': 1920, 'height': 1080},
                                           user_agent=user_agent,
-                                          locale='en-US',
-                                          timezone_id='America/New_York')
+                                          locale=locale,
+                                          timezone_id=timezone)
             if stealth:
                 context.add_init_script("""Object.defineProperty(navigator, 'webdriver', {get: () => undefined});""")
                 context.add_init_script("""window.chrome = { runtime: {} };""")
