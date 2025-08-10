@@ -10,6 +10,7 @@ from playwright.sync_api import sync_playwright
 
 DEFAULT_USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 " \
                      "(KHTML, like Gecko) Chrome/127.0.0.0 Safari/537.36"
+PAGE_FILE_PREFIX = 'browser_page'
 
 logger = logging.getLogger(__name__)
 
@@ -17,7 +18,6 @@ logger = logging.getLogger(__name__)
 class State:
     def __init__(self, file):
         self.file = file
-        os.makedirs(os.path.dirname(self.file), exist_ok=True)
 
     def load(self):
         try:
@@ -27,6 +27,7 @@ class State:
             return None
 
     def save(self, state):
+        os.makedirs(os.path.dirname(self.file), exist_ok=True)
         with open(self.file, 'w', encoding='utf-8') as f:
             f.write(json.dumps(state))
 
@@ -61,9 +62,9 @@ def playwright_context(state: State, headless=True, user_agent=DEFAULT_USER_AGEN
 def save_page(page, save_dir, name, save_content=True, save_screenshot=True,
               purge_delta=3600 * 24 * 30):
     os.makedirs(save_dir, exist_ok=True)
-    list(map(os.remove, [f for f in glob(os.path.join(save_dir, 'browser_page-*'))
+    list(map(os.remove, [f for f in glob(os.path.join(save_dir, f'{PAGE_FILE_PREFIX}-*'))
                          if os.stat(f).st_mtime < time.time() - purge_delta]))
-    basename = f'browser_page-{int(time.time())}-{name}'
+    basename = f'{PAGE_FILE_PREFIX}-{int(time.time())}-{name}'
     if save_content:
         content_file = os.path.join(save_dir, f'{basename}.html')
         with open(content_file, 'w', encoding='utf-8') as f:
