@@ -10,7 +10,7 @@ from playwright.sync_api import sync_playwright
 
 DEFAULT_USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 " \
                      "(KHTML, like Gecko) Chrome/127.0.0.0 Safari/537.36"
-PAGE_FILE_PREFIX = 'browser_page'
+SAVE_PAGE_PREFIX = 'browser_page'
 
 logger = logging.getLogger(__name__)
 
@@ -62,9 +62,9 @@ def playwright_context(state: State, headless=True, user_agent=DEFAULT_USER_AGEN
 def save_page(page, save_dir, name, save_content=True, save_screenshot=True,
               purge_delta=3600 * 24 * 30):
     os.makedirs(save_dir, exist_ok=True)
-    list(map(os.remove, [f for f in glob(os.path.join(save_dir, f'{PAGE_FILE_PREFIX}-*'))
+    list(map(os.remove, [f for f in glob(os.path.join(save_dir, f'{SAVE_PAGE_PREFIX}-*'))
                          if os.stat(f).st_mtime < time.time() - purge_delta]))
-    basename = f'{PAGE_FILE_PREFIX}-{int(time.time())}-{name}'
+    basename = f'{SAVE_PAGE_PREFIX}-{int(time.time())}-{name}'
     if save_content:
         content_file = os.path.join(save_dir, f'{basename}.html')
         with open(content_file, 'w', encoding='utf-8') as f:
