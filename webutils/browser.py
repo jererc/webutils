@@ -4,7 +4,6 @@ import json
 import logging
 import os
 import time
-from urllib.parse import urlparse
 
 from playwright.sync_api import sync_playwright
 
@@ -16,20 +15,20 @@ logger = logging.getLogger(__name__)
 
 
 class State:
-    def __init__(self, base_dir, url):
-        self.file = os.path.join(base_dir, f'{urlparse(url).netloc}.json')
-        os.makedirs(base_dir, exist_ok=True)
+    def __init__(self, file):
+        self.file = file
+        os.makedirs(os.path.dirname(self.file), exist_ok=True)
 
     def load(self):
         try:
-            with open(self.file, 'r', encoding='utf-8') as fd:
-                return json.load(fd)
+            with open(self.file, 'r', encoding='utf-8') as f:
+                return json.load(f)
         except FileNotFoundError:
             return None
 
     def save(self, state):
-        with open(self.file, 'w', encoding='utf-8') as fd:
-            fd.write(json.dumps(state))
+        with open(self.file, 'w', encoding='utf-8') as f:
+            f.write(json.dumps(state))
 
 
 @contextmanager
