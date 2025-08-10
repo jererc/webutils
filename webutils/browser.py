@@ -61,9 +61,9 @@ def playwright_context(state: State, headless=True, user_agent=DEFAULT_USER_AGEN
 def save_page(page, save_dir, name, save_content=True, save_screenshot=True,
               purge_delta=3600 * 24 * 30):
     os.makedirs(save_dir, exist_ok=True)
-    list(map(os.remove, [f for f in glob(os.path.join(save_dir, '*'))
+    list(map(os.remove, [f for f in glob(os.path.join(save_dir, 'browser_page-*'))
                          if os.stat(f).st_mtime < time.time() - purge_delta]))
-    basename = f'{int(time.time())}-{name}'
+    basename = f'browser_page-{int(time.time())}-{name}'
     if save_content:
         content_file = os.path.join(save_dir, f'{basename}.html')
         with open(content_file, 'w', encoding='utf-8') as f:
