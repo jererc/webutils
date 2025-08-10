@@ -46,8 +46,6 @@ def playwright_context(state: State, headless=True, user_agent=DEFAULT_USER_AGEN
                                           user_agent=user_agent,
                                           locale="en-US",
                                           timezone_id="America/New_York")
-            # if request_handler:
-            #     context.route('**/*', request_handler)
             context.add_init_script("""Object.defineProperty(navigator, 'webdriver', {get: () => undefined});""")
             context.add_init_script("""window.chrome = { runtime: {} };""")
             context.add_init_script("""Object.defineProperty(navigator, 'languages', {get: () => ['en-US', 'en']});""")
