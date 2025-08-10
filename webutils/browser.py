@@ -6,7 +6,7 @@ import os
 import time
 from urllib.parse import urlparse
 
-from playwright.sync_api import TimeoutError, sync_playwright
+from playwright.sync_api import sync_playwright
 
 
 DEFAULT_USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 " \
