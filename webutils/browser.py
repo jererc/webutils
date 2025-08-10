@@ -32,7 +32,7 @@ class State:
 
 
 @contextmanager
-def playwright_context(state: State, headless=True, user_agent=DEFAULT_USER_AGENT):
+def playwright_context(state: State, headless=True, user_agent=DEFAULT_USER_AGENT, stealth=True):
     with sync_playwright() as p:
         context = None
         try:
@@ -43,12 +43,13 @@ def playwright_context(state: State, headless=True, user_agent=DEFAULT_USER_AGEN
             context = browser.new_context(storage_state=state.load(),
                                           viewport={'width': 1920, 'height': 1080},
                                           user_agent=user_agent,
-                                          locale="en-US",
-                                          timezone_id="America/New_York")
-            context.add_init_script("""Object.defineProperty(navigator, 'webdriver', {get: () => undefined});""")
-            context.add_init_script("""window.chrome = { runtime: {} };""")
-            context.add_init_script("""Object.defineProperty(navigator, 'languages', {get: () => ['en-US', 'en']});""")
-            context.add_init_script("""Object.defineProperty(navigator, 'plugins', {get: () => [1, 2, 3, 4, 5]});""")
+                                          locale='en-US',
+                                          timezone_id='America/New_York')
+            if stealth:
+                context.add_init_script("""Object.defineProperty(navigator, 'webdriver', {get: () => undefined});""")
+                context.add_init_script("""window.chrome = { runtime: {} };""")
+                context.add_init_script("""Object.defineProperty(navigator, 'languages', {get: () => ['en-US', 'en']});""")
+                context.add_init_script("""Object.defineProperty(navigator, 'plugins', {get: () => [1, 2, 3, 4, 5]});""")
             yield context
         finally:
             if context:
