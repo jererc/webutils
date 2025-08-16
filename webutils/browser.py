@@ -33,8 +33,9 @@ class State:
 
 
 @contextmanager
-def playwright_context(state: State, headless=True, user_agent=DEFAULT_USER_AGENT,
+def playwright_context(state_file, headless=True, user_agent=DEFAULT_USER_AGENT,
                        locale='en-US', timezone='America/New_York', stealth=True):
+    state = State(state_file)
     with sync_playwright() as p:
         context = None
         try:
